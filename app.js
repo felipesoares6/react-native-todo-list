@@ -16,6 +16,8 @@ class App extends Component {
       items: [],
       dataSource: ds.cloneWithRows([])
     }
+
+    this.handleToggleComplete = this.handleToggleComplete.bind(this);
     this.dataSource = this.setSource.bind(this);
     this.handleAddItem = this.handleAddItem.bind(this);
     this.handleToggleAllComplete = this.handleToggleAllComplete.bind(this);
@@ -62,8 +64,20 @@ class App extends Component {
       items: newItems,
       value: ''
     })
+  }
 
-    console.log(this.state.items)
+  handleToggleComplete (key, complete) {
+    const newItems = this.state.items.map((item) => {
+      if ( item.key != key ) {
+        return item;
+      }
+
+      return {
+        ...item,
+        complete
+      }
+    })
+    this.setSource(newItems, newItems, otherState = {})
   }
 
   render () {
@@ -83,7 +97,10 @@ class App extends Component {
             onScroll={() => Keyboard.dimiss()}
             renderRow={({ key, ...value }) => {
               return (
-                <Row key={key} {...value} />
+                <Row
+                  key={key}
+                  {...value}
+                  onComplete={(complete) => this.handleToggleComplete(key, complete)} />
               )
             }}
             renderSeparator={(sectionId, rowId) => {
