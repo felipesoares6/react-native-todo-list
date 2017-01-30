@@ -121,7 +121,7 @@ class App extends Component {
             style={styles.list}
             enableEmptySections
             dataSource={this.state.dataSource}
-            onScroll={() => Keyboard.dimiss()}
+            onScroll={() => Keyboard.dismiss()}
             renderRow={({ key, ...value }) => {
               return (
                 <Row
@@ -136,6 +136,7 @@ class App extends Component {
             }}/>
         </View>
         <Footer
+          count={filterItems('ACTIVE', this.state.items).length}
           onFilter={this.handleFilter}
           filter={this.state.filter}/>
       </View>
