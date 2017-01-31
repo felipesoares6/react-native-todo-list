@@ -30,6 +30,7 @@ class App extends Component {
       dataSource: ds.cloneWithRows([])
     }
 
+    this.handleClearComplete = this.handleClearComplete.bind(this);
     this.handleFilter = this.handleFilter.bind(this);
     this.handleRemoveItem = this.handleRemoveItem.bind(this);
     this.handleToggleComplete = this.handleToggleComplete.bind(this);
@@ -93,6 +94,11 @@ class App extends Component {
     this.setSource(newItems, filterItems(this.state.filter, newItems));
   }
 
+  handleClearComplete () {
+    const newItems = filterItems('ACTIVE', this.state.items);
+    this.setSource(newItems, filterItems(this.state.filter, newItems));
+  }
+
   handleToggleComplete (key, complete) {
     const newItems = this.state.items.map((item) => {
       if ( item.key != key ) {
@@ -137,6 +143,7 @@ class App extends Component {
         </View>
         <Footer
           count={filterItems('ACTIVE', this.state.items).length}
+          onClearComplete={this.handleClearComplete}
           onFilter={this.handleFilter}
           filter={this.state.filter}/>
       </View>
