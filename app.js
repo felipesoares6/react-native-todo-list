@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Platform, ListView, Keyboard, AsyncStorage } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator ,Platform, ListView, Keyboard, AsyncStorage } from 'react-native';
 import Header from './header';
 import Footer from './footer';
 import Row from './row';
@@ -23,6 +23,7 @@ class App extends Component {
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) =>  r1 != r2});
 
     this.state = {
+      loading: true,
       allComplete: false,
       filter: 'ALL',
       value: '',
@@ -30,6 +31,8 @@ class App extends Component {
       dataSource: ds.cloneWithRows([])
     }
 
+    this.handleToggleEditing = this.handleToggleEditing.bind(this);
+    this.handleUpdateText = this.handleUpdateText.bind(this);
     this.handleClearComplete = this.handleClearComplete.bind(this);
     this.handleFilter = this.handleFilter.bind(this);
     this.handleRemoveItem = this.handleRemoveItem.bind(this);
@@ -43,9 +46,11 @@ class App extends Component {
     AsyncStorage.getItem('items').then((json) => {
       try {
         const items = JSON.parse(json);
-        this.setSource(items, items);
+        this.setSource(items, items, { loading: false });
       } catch (e) {
-
+        this.setState({
+           loading: false
+        })
       }
     })
   }
@@ -126,6 +131,36 @@ class App extends Component {
     this.setSource(newItems, filterItems(this.state.filter, newItems))
   }
 
+  handleUpdateText (key, text) {
+    const newItems = this.state.items.map((item) => {
+      if (item.key != key) {
+        return item;
+      }
+
+      return {
+        ...item,
+        text
+      }
+    })
+
+    this.setSource(newItems, filterItems(this.state.filter, newItems));
+  }
+
+  handleToggleEditing (key, editing) {
+    const newItems = this.state.items.map((item) => {
+      if (item.key != key) {
+        return item;
+      }
+
+      return {
+        ...item,
+        editing
+      }
+    })
+
+    this.setSource(newItems, filterItems(this.state.filter, newItems));
+  }
+
   render () {
     return (
       <View style={styles.container}>
@@ -146,6 +181,8 @@ class App extends Component {
                 <Row
                   key={key}
                   {...value}
+                  onUpdate={(text) => this.handleUpdateText(key, text)}
+                  onToggleEdit={(editing) => this.handleToggleEditing(key, editing)}
                   onRemove={() => this.handleRemoveItem(key)}
                   onComplete={(complete) => this.handleToggleComplete(key, complete)} />
               )
@@ -159,6 +196,12 @@ class App extends Component {
           onClearComplete={this.handleClearComplete}
           onFilter={this.handleFilter}
           filter={this.state.filter}/>
+
+          {this.state.loading && <View style={styles.loading}>
+            <ActivityIndicator
+              animating
+              size='large' />
+          </View>}
       </View>
     )
   }
@@ -179,6 +222,17 @@ const styles = StyleSheet.create({
 
   list: {
     backgroundColor: '#fff'
+  },
+
+  loading: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,.2)"
   },
 
   separator: {
